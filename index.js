@@ -16,6 +16,9 @@ class project {
   }
 };
 
+
+var totalReq = 0;
+
 const projects = [
   {id:1, title: "App 1", tasks:["abrir", "fechar","concluir"]},
   {id:2, title: "App 2", tasks:["abrir2", "fechar2","concluir2"]},
@@ -23,7 +26,18 @@ const projects = [
   
 ];
 
+//middleware: para interceptar o acesso a qualquer rota e executar uma rotina
+server.use('/projects/', (req,res, next) => {
+  console.time('Request');
+  
+  console.log(`Método: ${req.method};  URL: ${req.url}`);
 
+  totalReq += 1;
+  next();
+  console.timeEnd('Request');
+
+  console.log(`Total Requisições: ${totalReq}`);
+});
 
 function checkUserInArray(req, res, next) {
   if (!projects.find(o => o.id == req.params.id)){
@@ -56,6 +70,22 @@ server.post('/projects', (req,res) => {
 
   projects.push(project);
   
+  return res.json(projects);
+    
+  
+});
+
+
+server.post('/projects/:id/tasks', checkUserInArray, (req,res) => {
+  const { id } = req.params;
+  const {title} = req.body;
+
+  idx = projects.findIndex(o => o.id == id);
+
+  projects[idx].tasks.push(title);
+  console.log(`Usuario retornado: ${id} `);
+
+
   return res.json(projects);
     
   
